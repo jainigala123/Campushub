@@ -1,282 +1,270 @@
-# CampusHub
+# 🎓 Campus Hub — Complete Technical Documentation & Beginner's Guide
 
-## Product Requirements Document (PRD)
+Welcome to **Campus Hub**, a modern, full-featured campus community platform designed to connect students with intercollegiate events, workshops, hackathons, and student clubs.
 
-### Version
-v1.0 (MVP)
+This document serves as an exhaustive, beginner-friendly guide to the architecture, codebase structure, individual files, and code logic of Campus Hub.
 
-## 1. Problem Statement
-Universities often rely on multiple disconnected platforms for student activities. Events are shared through WhatsApp groups, club registrations are handled through Google Forms, announcements are scattered across emails and social media, and students struggle to discover opportunities. Club organizers also lack a centralized system to manage members and events.
+---
 
-This fragmented experience leads to poor communication, missed events, duplicate work, and low student engagement. CampusHub aims to solve this by providing a single platform where students and clubs can interact.
+## 📚 Table of Contents
+1. [Overview & Key Features](#-overview--key-features)
+2. [Tech Stack](#-tech-stack)
+3. [Full Project Directory Structure](#-full-project-directory-structure)
+4. [File-by-File Breakdown & Code Logic](#-file-by-file-breakdown--code-logic)
+5. [Core Concepts Explained for Beginners](#-core-concepts-explained-for-beginners)
+6. [Getting Started & Local Setup](#-getting-started--local-setup)
 
-## 2. Vision
-CampusHub will become a modern digital campus community where students can discover communities, participate in events, and stay connected through one platform.
+---
 
-CampusHub is not an LMS. It is the community layer of a college.
+## 🌟 Overview & Key Features
 
-## 3. Objectives
-### Students should be able to
-- Create an account
-- Join clubs
-- Browse upcoming events
-- Register for events
-- Receive announcements
-- Manage their own profile
+Campus Hub is divided into two primary role-isolated experiences:
 
-### Club Administrators should be able to
-- Create clubs
-- Publish events
-- Manage members
-- Publish announcements
-- View participation analytics
+### 🎓 1. Student Experience
+- **Event Discovery**: Filter campus experiences by Category (*Hackathons, Cultural, Workshops, Sports, Seminars, Competitions*) and Location (*Campus Wide, Near Me*).
+- **Interactive Event Detail Modal**: Modal popup with detailed event descriptions, rules, timelines, and 1-click registration.
+- **Student Dashboard (`/dashboard`)**: Central hub for viewing active passes, upcoming events, and ticket statuses (*Allowed to Attend*).
+- **Digital Ticket Pass & Unique Registration ID**: Every registration issues a unique Registration ID (e.g. `CH-2026-94821`) alongside a digital pass complete with a QR code for gate check-in.
 
-### Super Admin should be able to
-- Approve clubs
-- Manage users
-- Moderate content
-- View platform statistics
+### 🛡️ 2. Club Manager / Organizer Experience
+- **Manager Portal (`/manager/dashboard`)**: Dashboard for club leads to manage club profiles, events, and live gate attendance.
+- **Create Event with Limited Passes**: Publish events with custom seat capacities (*e.g., 50 or 100 max passes*).
+- **Live Participant Check-In Tracker**: View registered students, email addresses, pass types, and gate check-in timestamps with a 1-click manual "Let In" action.
+- **📱 Mobile QR Scanner Web-App (`/scanner`)**: Mobile-optimized scanner view featuring a laser viewfinder animation, live registration ID verification, audio/visual check-in feedback ("ENTRY ALLOWED ✅"), and real-time gate entry counters.
+- **Announcements & Sponsor Manager**: Publish announcements to attendee feeds and showcase event brand sponsors (*Gold, Platinum, Tech Partner*).
 
-## 4. Target Users
-### Primary
-- College Students
-- Age: 18–25
-- Needs: Find clubs, register for events, network, stay updated
+---
 
-### Secondary
-- Club Coordinators
-- Needs: Organize events, manage registrations, publish notices
+## 🛠️ Tech Stack
 
-### Tertiary
-- College Administration
-- Needs: Platform oversight, user moderation, analytics
+- **Frontend Framework**: [React 18](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Routing**: [React Router DOM v6](https://reactrouter.com/)
+- **Styling**: [TailwindCSS 3](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Icons**: [React Icons (Feather Icons - `fi`)](https://react-icons.github.io/react-icons/)
+- **State & Storage**: React Context API (`AuthContext`) + `localStorage` persistence
+- **Backend & Database**: [Supabase JS Client](https://supabase.com/)
 
-## 5. MVP Scope
-CampusHub v1 focuses on solving four core problems.
+---
 
-### Module 1: Authentication
-Features:
-- Login
-- Signup
-- Logout
-- Forgot Password
+## 📁 Full Project Directory Structure
 
-### Module 2: Club Directory
-Features:
-- Browse Clubs
-- View Club Details
-- Join Club
-- Leave Club
+```text
+Campushub/
+├── client/                           # Main React Single Page Application (SPA)
+│   ├── public/                       # Static public assets
+│   ├── src/
+│   │   ├── components/               # Reusable UI Components
+│   │   │   ├── auth/
+│   │   │   │   └── ProtectedRoute.jsx   # Role-based route protection guard
+│   │   │   ├── buttons/
+│   │   │   │   ├── PrimaryButton.jsx    # Styled primary button
+│   │   │   │   └── SecondaryButton.jsx  # Styled secondary button
+│   │   │   ├── cards/
+│   │   │   │   ├── CategoryCard.jsx     # Category preview card
+│   │   │   │   ├── ClubCard.jsx         # Club directory preview card
+│   │   │   │   └── EventCard.jsx        # Event card with fallback poster handling
+│   │   │   ├── common/
+│   │   │   │   ├── Badge.jsx            # Status badge pill
+│   │   │   │   ├── SectionHeading.jsx   # Reusable section title & description
+│   │   │   │   ├── StatCard.jsx         # Metric display card
+│   │   │   │   └── TestimonialCard.jsx  # Student review card
+│   │   │   ├── footer/
+│   │   │   │   └── Footer.jsx           # App footer navigation & copyright
+│   │   │   ├── modals/
+│   │   │   │   └── EventDetailModal.jsx # Popup modal for event schedule & rules
+│   │   │   ├── navbar/
+│   │   │   │   └── Navbar.jsx           # Dynamic header with role-based menu items
+│   │   │   └── tickets/
+│   │   │       └── TicketPassModal.jsx  # Digital pass modal with QR code & Print PDF
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx       # Global Auth, Tickets, & Manager state
+│   │   ├── data/
+│   │   │   └── dummyData.js          # Default seed dataset for events, clubs, stats
+│   │   ├── layouts/
+│   │   │   └── Layout.jsx            # Main app page shell (Navbar + Outlet + Footer)
+│   │   ├── lib/
+│   │   │   └── supabase.js           # Supabase client initialization
+│   │   ├── pages/
+│   │   │   ├── About/AboutPage.jsx
+│   │   │   ├── Auth/
+│   │   │   │   ├── LoginPage.jsx     # Login form with role & demo shortcuts
+│   │   │   │   └── SignupPage.jsx    # Registration form with role selector
+│   │   │   ├── Clubs/
+│   │   │   │   ├── ClubDetailsPage.jsx
+│   │   │   │   └── ClubsPage.jsx
+│   │   │   ├── Contact/
+│   │   │   │   ├── ContactPage.jsx
+│   │   │   │   ├── PrivacyPage.jsx
+│   │   │   │   └── TermsPage.jsx
+│   │   │   ├── Dashboard/
+│   │   │   │   ├── ManagerDashboard.jsx  # Club Manager portal & participant check-in
+│   │   │   │   └── StudentDashboard.jsx  # Student ticket passes & events overview
+│   │   │   ├── Events/
+│   │   │   │   ├── EventDetailsPage.jsx  # Dedicated event landing page
+│   │   │   │   └── EventsPage.jsx        # Searchable event directory with filters
+│   │   │   ├── Landing/
+│   │   │   │   └── LandingPage.jsx       # Public landing page (redirects if logged in)
+│   │   │   ├── NotFound/
+│   │   │   │   └── NotFoundPage.jsx      # 404 fallback page
+│   │   │   └── Scanner/
+│   │   │       └── MobileScannerPage.jsx # Mobile web-app QR & ID scanner
+│   │   ├── services/
+│   │   │   └── api.js                # Optional API helper service
+│   │   ├── styles/
+│   │   │   └── index.css             # TailwindCSS import directives & custom styles
+│   │   ├── App.jsx                   # Central application routing configuration
+│   │   └── main.jsx                  # Application entry point (DOM render)
+│   ├── .env                          # Client environment variables (Supabase keys)
+│   ├── index.html                    # Root HTML document template
+│   ├── package.json                  # Dependencies & npm scripts
+│   ├── tailwind.config.js            # Tailwind styling tokens & theme colors
+│   └── vite.config.js                # Vite build configuration
+├── backend/                          # Backend Node.js server (optional API layer)
+└── README.md                         # Project documentation
+```
 
-### Module 3: Events
-Features:
-- Browse Events
-- Event Details
-- Register
-- Cancel Registration
+---
 
-### Module 4: Announcements
-Features:
-- View Announcements
-- Filter by Club
+## 📖 File-by-File Breakdown & Code Logic
 
-### Module 5: Profile
-Features:
-- Edit Profile
-- Joined Clubs
-- Registered Events
+Below is a detailed walkthrough of how each file functions:
 
-## 6. Out of Scope (v1)
-The MVP will not include:
-- Chat
-- Payments
-- Attendance
-- QR Check-in
-- Certificates
-- Notifications
-- Mobile App
-- AI Features
-- Calendar Sync
+### 1. `client/src/App.jsx`
+- **Purpose**: Defines the primary application routing table using `react-router-dom`.
+- **Key Logic**:
+  - Sets up routes inside `<AuthProvider>` so state is available everywhere.
+  - Places standard pages (`/events`, `/clubs`, `/dashboard`, `/manager/dashboard`) inside `<Layout />`.
+  - Configures `<ProtectedRoute allowedRole="student">` for `/dashboard` to ensure Managers are redirected to `/manager/dashboard`.
+  - Configures `<ProtectedRoute allowedRole="organizer">` for `/manager/dashboard` and `/scanner` to block unauthorized student access.
 
-## 7. Functional Requirements
-### Authentication
-Users can:
-- Register
-- Login
-- Logout
+### 2. `client/src/context/AuthContext.jsx`
+- **Purpose**: Central state manager for authentication, user roles, tickets, participant check-ins, events, announcements, and sponsors.
+- **Key Logic**:
+  - `user`: Holds current user object (`id`, `name`, `email`, `role`).
+  - `tickets`: List of event tickets registered by the student.
+  - `participants`: Master participant list for event organizers.
+  - `registerForEvent(event)`: Generates a new ticket with a unique Registration ID (e.g. `CH-2026-94821`), saves it to `tickets`, and adds the student to `participants`.
+  - `checkInParticipant(ticketId)`: Searches for a ticket by ID, updates its status to `'Checked-In'`, records timestamp, and returns validation status.
+  - `createManagerEvent(data)`: Adds a new event with limited pass capacity to the event directory.
 
-Validation:
-- Email must be unique
-- Password minimum 8 characters
+### 3. `client/src/components/auth/ProtectedRoute.jsx`
+- **Purpose**: High-order guard component that enforces role-based access control.
+- **Key Logic**:
+  - If user is not logged in $\rightarrow$ redirects to `/login`.
+  - If `allowedRole === 'organizer'` and user is a Student $\rightarrow$ redirects to `/dashboard`.
+  - If `allowedRole === 'student'` and user is an Organizer $\rightarrow$ redirects to `/manager/dashboard`.
 
-### Clubs
-Users can:
-- Browse clubs
-- Search clubs
-- View club information
+### 4. `client/src/components/navbar/Navbar.jsx`
+- **Purpose**: Sticky navigation bar present across all pages.
+- **Key Logic**:
+  - Inspects `user.role` from `useAuth()`.
+  - **Student View**: Shows *Dashboard*, *Events*, *Clubs*, User Avatar Badge, and *Logout*.
+  - **Manager View**: Shows *Manager Portal*, *📱 Mobile Scanner*, *Events*, *Clubs*, Manager Badge, and *Logout*.
+  - **Public View**: Shows *Home*, *Events*, *Clubs*, *About*, *Contact*, *Login*, and *Register*.
 
-Club Admins can:
-- Create club
-- Edit club
-- Delete club
+### 5. `client/src/components/modals/EventDetailModal.jsx`
+- **Purpose**: Pop-up window for viewing full event details without navigating away.
+- **Key Logic**:
+  - Renders event poster image (with automatic fallback gradient if image URL fails).
+  - Displays event schedule timeline, venue, rules, and entry guidelines.
+  - Shows instant registration status or a **"Register & Get Ticket"** button.
 
-### Events
-Students can:
-- Browse events
-- Register
-- Cancel registration
+### 6. `client/src/components/tickets/TicketPassModal.jsx`
+- **Purpose**: Digital ticket pass modal formatted like a physical event ticket.
+- **Key Logic**:
+  - Prominently displays the **Unique Registration ID** (e.g. `CH-2026-94821`).
+  - Displays attendee name, email, gate access instructions, and date/time.
+  - Generates a visual QR code for gate scanning.
+  - Features a **"Print / Save PDF"** button (`window.print()`).
 
-Club Admins can:
-- Create event
-- Edit event
-- Delete event
+### 7. `client/src/pages/Dashboard/StudentDashboard.jsx`
+- **Purpose**: Post-login home page for students.
+- **Key Logic**:
+  - **Tab 1 ("My Event Tickets")**: Displays digital ticket pass cards with unique IDs, gate status (*Allowed to Attend*), and quick button to open `TicketPassModal`.
+  - **Tab 2 ("Explore All Events")**: Grid of campus events with search bar and category filters.
 
-### Announcements
-Club Admins can:
-- Publish announcements
+### 8. `client/src/pages/Dashboard/ManagerDashboard.jsx`
+- **Purpose**: Post-login portal for Club Managers & Event Organizers.
+- **Key Logic**:
+  - **Tab 1 ("Attendees & Gate Entry")**: Live participant table showing registration IDs, names, emails, check-in status, and 1-click "Let In" action button.
+  - **Tab 2 ("Create Event & Limited Passes")**: Form to publish new events with seat capacity limits.
+  - **Tab 3 ("Manage Club Page & Posts")**: Edit club profile and post announcement feeds.
+  - **Tab 4 ("Add Event Sponsors")**: Add sponsor brand logos and assign sponsor tiers (*Platinum, Gold, Tech Partner*).
 
-Students can:
-- Read announcements
+### 9. `client/src/pages/Scanner/MobileScannerPage.jsx`
+- **Purpose**: Standalone mobile web-app for scanning QR codes and checking in attendees.
+- **Key Logic**:
+  - Fullscreen dark interface optimized for smartphone screens (`/scanner`).
+  - Features an animated laser viewfinder overlay.
+  - Form to enter or scan Registration IDs.
+  - Triggers instant **"ENTRY ALLOWED ✅"** or **"DENIED ❌"** verification feedback cards.
 
-### Profiles
-Students can:
-- Upload avatar
-- Update bio
-- View joined clubs
-- View event history
+### 10. `client/src/pages/Events/EventsPage.jsx`
+- **Purpose**: Public searchable events directory.
+- **Key Logic**:
+  - Sidebar filters for Category and Location (*Campus Wide, Near Me*) with aligned padding (`px-5 py-3.5`).
+  - Real-time search query filtering over event titles and locations.
 
-## 8. Non-Functional Requirements
-### Performance
-- Pages should load within 2 seconds under normal conditions.
+---
 
-### Usability
-- New users should be able to register for an event without guidance.
+## 🔍 Core Concepts Explained for Beginners
 
-### Security
-- Passwords must be securely hashed.
-- Protected routes should require authentication.
-- Role-based access should prevent unauthorized actions.
+### 1. What is React Context (`AuthContext`)?
+Instead of passing user data down through every component using props (known as *prop drilling*), React Context creates a global store. Any component in Campus Hub can simply call `useAuth()` to get the current user, active tickets, or trigger a check-in.
 
-### Scalability
-- Support at least 10,000 users and 500 concurrent sessions without architectural changes.
+### 2. How are Unique Registration IDs Generated?
+When a student clicks "Register", `registerForEvent()` runs in `AuthContext.jsx`:
+```javascript
+const randomDigits = Math.floor(10000 + Math.random() * 90000);
+const newTicketId = `CH-2026-${randomDigits}`;
+```
+This guarantees every issued ticket gets a unique code like `CH-2026-94821`.
 
-### Accessibility
-- Keyboard navigation for all interactive elements.
-- Sufficient color contrast.
-- Semantic HTML where applicable.
+### 3. How Does Role-Based Protection Work?
+When a user attempts to open `/manager/dashboard`:
+1. `App.jsx` evaluates the `<ProtectedRoute allowedRole="organizer">` wrapper.
+2. `ProtectedRoute.jsx` inspects `user.role`.
+3. If `user.role !== 'organizer'`, it returns `<Navigate to="/dashboard" replace />`, automatically redirecting student accounts away from administrative portals.
 
-## 9. User Stories
-### Student
-- As a student, I want to browse clubs so that I can find communities that match my interests.
-- As a student, I want to register for events so that I can participate without contacting organizers.
-- As a student, I want to manage my profile so others can recognize me.
+---
 
-### Club Admin
-- As a club coordinator, I want to publish events so students can register online.
-- As a club coordinator, I want to view registrations so I know how many attendees to expect.
+## 🚀 Getting Started & Local Setup
 
-### Super Admin
-- As an administrator, I want to manage clubs so inappropriate content can be removed.
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) (v18 or higher) installed on your system.
 
-## 10. Success Metrics
-Within the first semester of deployment:
-- 80% of students create an account.
-- At least 60% of active clubs create a CampusHub page.
-- Average event registration time is under one minute.
-- More than 70% of event registrations occur through the platform.
+### Installation Steps
 
-## 11. Suggested Sprint Plan for MVP Development
-This roadmap assumes a React frontend, an Express/Node.js backend, and Supabase for authentication, database, and storage.
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/jainigala123/Campushub.git
+   cd Campushub
+   ```
 
-### Recommended Tech Stack
-- Frontend: React, Vite, React Router, Tailwind CSS, Axios or Fetch
-- Backend: Node.js, Express.js, JWT authentication
-- Database & Auth: Supabase PostgreSQL, Supabase Auth, Row Level Security (RLS)
-- Hosting: Vercel for frontend, Render or Railway for backend, Supabase for database
+2. **Navigate to the Client Directory & Install Dependencies**:
+   ```bash
+   cd client
+   npm install
+   ```
 
-### Sprint 1 — Project Foundation
-Goals:
-- Set up frontend and backend repositories
-- Configure Supabase project and environment variables
-- Create database schema for users, clubs, events, announcements, and memberships
-- Implement basic auth routes and protected routing
+3. **Start the Development Server**:
+   ```bash
+   npm run dev
+   ```
+   Open your browser and visit: `http://localhost:5173`
 
-Deliverables:
-- Working signup/login/logout flow
-- Basic app shell and navigation
-- Database tables and seed data
+4. **Testing User Roles**:
+   - **Student Demo**: Click "Login" $\rightarrow$ "Student Demo" $\rightarrow$ Navigates to `/dashboard`.
+   - **Manager Demo**: Click "Login" $\rightarrow$ "Organizer Demo" $\rightarrow$ Navigates to `/manager/dashboard`.
+   - **Mobile QR Scanner**: Log in as Manager $\rightarrow$ Click "📱 Mobile Scanner" or navigate to `http://localhost:5173/scanner`.
 
-### Sprint 2 — User Profiles and Club Directory
-Goals:
-- Build student profile management
-- Create club listing and club detail pages
-- Implement club join/leave functionality
-- Add search and filter by category
+5. **Build for Production**:
+   ```bash
+   npm run build
+   ```
 
-Deliverables:
-- Profile page with bio and avatar upload
-- Club directory with join/leave actions
-- Basic club admin role support
+---
 
-### Sprint 3 — Event Management
-Goals:
-- Build event browsing and event detail pages
-- Implement event registration and cancellation
-- Allow club admins to create/edit/delete events
-- Add event status and capacity handling
-
-Deliverables:
-- Event list and detail views
-- Registration workflow for students
-- Admin event management tools
-
-### Sprint 4 — Announcements and Content Publishing
-Goals:
-- Implement announcement creation for club admins
-- Add announcement listing and filtering by club
-- Add moderation support for super admins
-
-Deliverables:
-- Announcement feed
-- Club-specific announcement filters
-- Admin moderation controls
-
-### Sprint 5 — Role-Based Access and Admin Dashboards
-Goals:
-- Add role-based permissions for student, club admin, and super admin
-- Build admin dashboards for club approval and user management
-- Add analytics views for participation counts and club activity
-
-Deliverables:
-- Protected admin and club-admin routes
-- Basic analytics dashboard
-- Club approval workflow
-
-### Sprint 6 — Testing, Polish, and Deployment
-Goals:
-- Perform end-to-end testing for major user flows
-- Improve UI responsiveness and accessibility
-- Prepare deployment for production
-- Write basic documentation and onboarding steps
-
-Deliverables:
-- Deployed MVP
-- Bug fixes and UX refinements
-- README and setup instructions
-
-## 12. Suggested Development Order
-1. Authentication
-2. Clubs
-3. Events
-4. Announcements
-5. Profiles
-6. Admin features
-7. Testing and deployment
-
-## 13. Definition of Done for MVP
-A feature is considered complete when:
-- It works end-to-end in the browser
-- It is accessible and responsive
-- It is protected by the correct role-based rules
-- It is tested for the main happy path
-- It is documented in the project README
+## 📄 License
+This project is open-source and available under the MIT License.
