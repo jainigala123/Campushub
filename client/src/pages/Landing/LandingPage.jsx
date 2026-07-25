@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { FiArrowRight, FiChevronDown } from 'react-icons/fi';
 import SectionHeading from '../../components/common/SectionHeading';
 import StatCard from '../../components/common/StatCard';
@@ -8,10 +8,16 @@ import CategoryCard from '../../components/cards/CategoryCard';
 import ClubCard from '../../components/cards/ClubCard';
 import TestimonialCard from '../../components/common/TestimonialCard';
 import { collegeLogos, stats, featuredEvents, categories, features, clubs, testimonials, heroCards } from '../../data/dummyData';
+import { useAuth } from '../../context/AuthContext';
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 
 export default function LandingPage() {
+  const { user } = useAuth();
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
   return (
     <div className="overflow-hidden bg-slate-50">
       <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.15),transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(124,58,237,0.14),transparent_30%)] pt-28 pb-24">
@@ -33,7 +39,7 @@ export default function LandingPage() {
                   Explore Events
                   <FiArrowRight className="ml-3" />
                 </Link>
-                <Link to="/events" className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+                <Link to="/login" className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
                   Create Event
                 </Link>
               </div>
@@ -188,7 +194,7 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center justify-end pr-6 md:pr-12">
               <Link
-                to="/events"
+                to="/signup"
                 className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-slate-950 shadow transition hover:bg-slate-100"
               >
                 Get started
