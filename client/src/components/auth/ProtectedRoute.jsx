@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-export default function ProtectedRoute({ children, allowedRole }) {
+export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -14,18 +14,6 @@ export default function ProtectedRoute({ children, allowedRole }) {
 
   if (!user) {
     return <Navigate to="/login" replace />;
-  }
-
-  const isOrganizer = user.role === 'organizer' || user.name?.includes('Club Lead');
-
-  // If page is for organizers only and user is a student -> redirect to student dashboard
-  if (allowedRole === 'organizer' && !isOrganizer) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  // If page is for students only and user is an organizer -> redirect to manager portal
-  if (allowedRole === 'student' && isOrganizer) {
-    return <Navigate to="/manager/dashboard" replace />;
   }
 
   return children;

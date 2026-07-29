@@ -20,7 +20,7 @@ import {
 } from 'react-icons/fi';
 
 export default function StudentDashboard() {
-  const { user, tickets, cancelTicket, isRegistered, registerForEvent } = useAuth();
+  const { user, tickets, cancelTicket, isRegistered, registerForEvent, events } = useAuth();
   const [activeTab, setActiveTab] = useState('tickets'); // 'tickets' or 'events'
   const [selectedCategory, setSelectedCategory] = useState('All categories');
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,16 +29,18 @@ export default function StudentDashboard() {
   const [activeModalEvent, setActiveModalEvent] = useState(null);
   const [activePassTicket, setActivePassTicket] = useState(null);
 
+  const activeEvents = events && events.length > 0 ? events : featuredEvents;
+
   // Filter events for the Explore tab
-  const filteredEvents = featuredEvents.filter((event) => {
+  const filteredEvents = activeEvents.filter((event) => {
     const matchesSearch =
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.category.toLowerCase().includes(searchQuery.toLowerCase());
+      (event.location && event.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (event.category && event.category.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesCategory =
       selectedCategory === 'All categories' ||
-      event.category.toLowerCase() === selectedCategory.toLowerCase();
+      (event.category && event.category.toLowerCase() === selectedCategory.toLowerCase());
 
     return matchesSearch && matchesCategory;
   });

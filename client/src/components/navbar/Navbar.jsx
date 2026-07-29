@@ -15,7 +15,7 @@ const baseMenuItems = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, myMemberships } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -23,25 +23,27 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isOrganizer = user?.role === 'organizer' || user?.name?.includes('Club Lead');
+  const isOrganizer =
+    user?.role === 'organizer' ||
+    user?.role === 'club_admin' ||
+    user?.role === 'super_admin' ||
+    (myMemberships && myMemberships.length > 0) ||
+    user?.name?.includes('Club Lead');
 
-  // Strict role-based menu items
+  const myClubId = myMemberships && myMemberships.length > 0 ? myMemberships[0].club_id : null;
+
+  // Unified role-aware menu items
   const menuItems = user
-    ? isOrganizer
-      ? [
-          { label: 'Manager Portal', to: '/manager/dashboard' },
-          { label: '📱 Mobile Scanner', to: '/scanner' },
-          { label: 'Events', to: '/events' },
-          { label: 'Clubs', to: '/clubs' },
-        ]
-      : [
-          { label: 'Dashboard', to: '/dashboard' },
-          { label: 'Events', to: '/events' },
-          { label: 'Clubs', to: '/clubs' },
-        ]
+    ? [
+        { label: 'Events', to: '/events' },
+        { label: 'Clubs', to: '/clubs' },
+        { label: 'My Passes', to: '/dashboard' },
+        ...(isOrganizer ? [{ label: '📱 Gate Scanner', to: '/scanner' }] : []),
+        { label: 'Profile', to: '/profile' },
+      ]
     : baseMenuItems;
 
-  const userDashboardPath = isOrganizer ? '/manager/dashboard' : '/dashboard';
+  const userDashboardPath = '/dashboard';
 
   return (
     <motion.header

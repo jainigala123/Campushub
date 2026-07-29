@@ -7,17 +7,66 @@ import { FiCalendar, FiMapPin, FiCheckCircle, FiShare2, FiClock } from 'react-ic
 
 export default function EventDetailsPage() {
   const { id } = useParams();
-  const event = featuredEvents.find((item) => item.id === id) || featuredEvents[0];
-  const [imgError, setImgError] = useState(false);
-  const [registered, setRegistered] = useState(false);
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { user, events, registerForEvent, isRegistered } = useAuth();
+  const [imgError, setImgError] = useState(false);
+  const [fallbackAttempted, setFallbackAttempted] = useState(false);
 
-  const handleRegister = () => {
+  const event = events.find((e) => String(e.id) === String(id)) || {
+    id: id || 'event-1',
+    title: 'National Hackathon 2026',
+    date: 'Sep 30, 2026',
+    location: 'North Campus Hall B',
+    category: 'Hackathons',
+    poster: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80',
+    clubName: 'Campus Code Collective',
+    description: '36-hour non-stop hackathon building AI & web applications.',
+    capacity: 200,
+    availablePasses: 45,
+  };
+
+  const registered = isRegistered(event.id);
+
+  const getPosterSrc = () => {
+    let p = event.poster;
+    if (imgError && !fallbackAttempted) {
+      p = null;
+    }
+    if (p && typeof p === 'string' && p.trim().length > 0) {
+      p = p.trim();
+      if (!p.startsWith('http://') && !p.startsWith('https://') && !p.startsWith('data:') && !p.startsWith('blob:')) {
+        return `https://${p}`;
+      }
+      return p;
+    }
+    const cat = (event.category || '').toLowerCase();
+    if (cat.includes('hackathon') || cat.includes('code') || cat.includes('tech')) {
+      return 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80';
+    }
+    if (cat.includes('workshop') || cat.includes('seminar')) {
+      return 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=80';
+    }
+    if (cat.includes('cultural') || cat.includes('art') || cat.includes('fest')) {
+      return 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80';
+  };
+
+  const posterSrc = getPosterSrc();
+
+  const handleImgError = () => {
+    if (!fallbackAttempted) {
+      setFallbackAttempted(true);
+    } else {
+      setImgError(true);
+    }
+  };
+
+  const handleRegister = async () => {
     if (!user) {
       navigate('/signup');
     } else {
-      setRegistered(true);
+      await registerForEvent(event);
     }
   };
 
@@ -32,11 +81,11 @@ export default function EventDetailsPage() {
         >
           {/* Header Poster Image with Fallback */}
           <div className="relative h-[380px] sm:h-[440px] w-full overflow-hidden rounded-[2rem] bg-slate-100 shadow-inner">
-            {!imgError && event.poster ? (
+            {!imgError ? (
               <img
-                src={event.poster}
+                src={posterSrc}
                 alt={event.title}
-                onError={() => setImgError(true)}
+                onError={handleImgError}
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -73,7 +122,7 @@ export default function EventDetailsPage() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Organizer</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">Campus Hub Collective</p>
+              <p className="mt-1 text-sm font-semibold text-slate-900">{event.clubName || 'Campus Hub Collective'}</p>
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Entry</p>

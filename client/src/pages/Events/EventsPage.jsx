@@ -3,26 +3,30 @@ import { motion } from 'framer-motion';
 import { FiSearch, FiCheckCircle, FiMapPin, FiFilter } from 'react-icons/fi';
 import EventCard from '../../components/cards/EventCard';
 import { featuredEvents, categories } from '../../data/dummyData';
+import { useAuth } from '../../context/AuthContext';
 
 export default function EventsPage() {
+  const { events } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All categories');
   const [selectedLocation, setSelectedLocation] = useState('Campus wide');
 
+  const activeEvents = events && events.length > 0 ? events : featuredEvents;
+
   // Filter events based on search, category, and location
-  const filteredEvents = featuredEvents.filter((event) => {
+  const filteredEvents = activeEvents.filter((event) => {
     const matchesSearch =
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.category.toLowerCase().includes(searchQuery.toLowerCase());
+      (event.location && event.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (event.category && event.category.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesCategory =
       selectedCategory === 'All categories' ||
-      event.category.toLowerCase() === selectedCategory.toLowerCase();
+      (event.category && event.category.toLowerCase() === selectedCategory.toLowerCase());
 
     const matchesLocation =
       selectedLocation === 'Campus wide' ||
-      (selectedLocation === 'Near me' && event.location.toLowerCase().includes('campus'));
+      (selectedLocation === 'Near me' && event.location && event.location.toLowerCase().includes('campus'));
 
     return matchesSearch && matchesCategory && matchesLocation;
   });
@@ -198,7 +202,7 @@ export default function EventsPage() {
 
           {/* Footer Bar */}
           <div className="flex items-center justify-between rounded-[2rem] bg-white p-6 shadow-soft border border-slate-200/80">
-            <p className="text-sm text-slate-600">Showing {filteredEvents.length} of {featuredEvents.length} events</p>
+            <p className="text-sm text-slate-600">Showing {filteredEvents.length} of {activeEvents.length} events</p>
             <div className="flex items-center gap-2">
               <button className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50">
                 Prev

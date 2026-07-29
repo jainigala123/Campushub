@@ -13,62 +13,7 @@ export const stats = [
   { label: 'Colleges', value: '50+' },
 ];
 
-export const featuredEvents = [
-  {
-    id: '1',
-    title: 'Intercollege Hackathon',
-    date: 'Aug 28',
-    location: 'North Campus',
-    category: 'Hackathons',
-    poster: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=900&q=80',
-    description: '24-hour coding sprint bringing together student innovators to build futuristic tech apps.',
-  },
-  {
-    id: '2',
-    title: 'Cultural Fusion Fest',
-    date: 'Sep 04',
-    location: 'Main Quad',
-    category: 'Cultural',
-    poster: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80',
-    description: 'An electrifying night of live music, dance performances, and intercollege art showcases.',
-  },
-  {
-    id: '3',
-    title: 'Design Sprint Weekend',
-    date: 'Sep 12',
-    location: 'Innovation Hub',
-    category: 'Workshops',
-    poster: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80',
-    description: 'A hands-on UI/UX product design workshop guided by top tech lead mentors.',
-  },
-  {
-    id: '4',
-    title: 'AI & ML Student Summit',
-    date: 'Sep 20',
-    location: 'Engineering Auditorium',
-    category: 'Seminars',
-    poster: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=80',
-    description: 'Explore generative AI breakthroughs, research papers, and student AI startup demos.',
-  },
-  {
-    id: '5',
-    title: 'Inter-Varsity E-Sports Arena',
-    date: 'Oct 02',
-    location: 'Student Union Lounge',
-    category: 'Competitions',
-    poster: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=900&q=80',
-    description: 'Competitive Valorant and EA FC tournament with trophy awards and live streaming.',
-  },
-  {
-    id: '6',
-    title: 'Campus Athletics League',
-    date: 'Oct 15',
-    location: 'Central Sports Complex',
-    category: 'Sports',
-    poster: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=900&q=80',
-    description: 'Annual intercollege track, soccer, and basketball championship matches.',
-  },
-];
+export const featuredEvents = [];
 
 export const categories = [
   'Hackathons',

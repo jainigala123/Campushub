@@ -28,6 +28,10 @@ export default function ManagerDashboard() {
     participants,
     checkInParticipant,
     createManagerEvent,
+    deleteManagerEvent,
+    updateRegistrationStatus,
+    clubs,
+    myMemberships,
     clubProfile,
     updateClubPage,
     announcements,
@@ -40,41 +44,50 @@ export default function ManagerDashboard() {
   const [eventTitle, setEventTitle] = useState('');
   const [eventCategory, setEventCategory] = useState('Hackathons');
   const [eventDate, setEventDate] = useState('Sep 30, 2026');
-  const [eventLocation, setEventLocation] = useState('North Campus Auditorium');
-  const [eventCapacity, setEventCapacity] = useState('100');
+  const [eventLocation, setEventLocation] = useState('Main Campus Auditorium');
+  const [eventCapacity, setEventCapacity] = useState(100);
   const [eventDescription, setEventDescription] = useState('');
   const [eventPoster, setEventPoster] = useState('');
   const [eventCreatedSuccess, setEventCreatedSuccess] = useState(false);
+  const [selectedClubId, setSelectedClubId] = useState('');
 
   // Announcement Form State
   const [annTitle, setAnnTitle] = useState('');
   const [annContent, setAnnContent] = useState('');
 
   // Sponsor Form State
-  const [sponsorsList, setSponsorsList] = useState([
-    { name: 'GitHub', tier: 'Platinum Sponsor', logo: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=200&q=80' },
-    { name: 'Supabase', tier: 'Gold Sponsor', logo: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=200&q=80' },
-    { name: 'Vercel', tier: 'Tech Partner', logo: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=200&q=80' },
-  ]);
+  const [sponsorsList, setSponsorsList] = useState([]);
   const [sponsorName, setSponsorName] = useState('');
   const [sponsorTier, setSponsorTier] = useState('Gold Sponsor');
 
+  const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
+
   // Handle Event Submit
-  const handleCreateEvent = (e) => {
+  const handleCreateEvent = async (e) => {
     e.preventDefault();
-    createManagerEvent({
-      title: eventTitle || 'New Campus Hackathon',
-      category: eventCategory,
-      date: eventDate,
-      location: eventLocation,
-      capacity: eventCapacity,
-      description: eventDescription,
-      poster: eventPoster,
-    });
-    setEventCreatedSuccess(true);
-    setEventTitle('');
-    setEventDescription('');
-    setTimeout(() => setEventCreatedSuccess(false), 4000);
+    setIsSubmittingEvent(true);
+    const chosenClub = clubs.find((c) => String(c.id) === String(selectedClubId)) || clubs[0];
+    try {
+      await createManagerEvent({
+        title: eventTitle || 'New Campus Hackathon',
+        category: eventCategory,
+        date: eventDate,
+        location: eventLocation,
+        capacity: eventCapacity,
+        description: eventDescription,
+        poster: eventPoster,
+        clubId: chosenClub ? chosenClub.id : null,
+        clubName: chosenClub ? chosenClub.name : 'Campus Hub Collective',
+      });
+      setEventCreatedSuccess(true);
+      setEventTitle('');
+      setEventDescription('');
+      setTimeout(() => setEventCreatedSuccess(false), 3000);
+    } catch (err) {
+      console.warn('Event creation warning:', err);
+    } finally {
+      setIsSubmittingEvent(false);
+    }
   };
 
   // Handle Announcement Submit
@@ -240,42 +253,76 @@ export default function ManagerDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-xs">
-                    {participants.map((p) => (
-                      <tr key={p.ticketId} className="hover:bg-slate-50/70 transition">
-                        <td className="p-4 sm:p-5 font-mono font-bold text-primary">{p.ticketId}</td>
-                        <td className="p-4 sm:p-5">
-                          <p className="font-bold text-slate-900">{p.studentName}</p>
-                          <p className="text-[11px] text-slate-500">{p.email}</p>
-                        </td>
-                        <td className="p-4 sm:p-5 font-semibold text-slate-800">{p.eventTitle}</td>
-                        <td className="p-4 sm:p-5">
-                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">
-                            {p.passType || 'Standard Pass'}
-                          </span>
-                        </td>
-                        <td className="p-4 sm:p-5">
-                          {p.status === 'Checked-In' ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-800">
-                              <FiCheckCircle /> Checked In ({p.checkInTime || 'Gate Entry'})
+                    {participants.length > 0 ? (
+                      participants.map((p) => (
+                        <tr key={p.ticketId} className="hover:bg-slate-50/70 transition">
+                          <td className="p-4 sm:p-5 font-mono font-bold text-primary">{p.ticketId}</td>
+                          <td className="p-4 sm:p-5">
+                            <p className="font-bold text-slate-900">{p.studentName}</p>
+                            <p className="text-[11px] text-slate-500">{p.email}</p>
+                          </td>
+                          <td className="p-4 sm:p-5 font-semibold text-slate-800">{p.eventTitle}</td>
+                          <td className="p-4 sm:p-5">
+                            <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">
+                              {p.passType || 'Standard Pass'}
                             </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-800">
-                              Registered · Pending Gate
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-4 sm:p-5 text-right">
-                          {p.status !== 'Checked-In' && (
-                            <button
-                              onClick={() => checkInParticipant(p.ticketId)}
-                              className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-4 py-1.5 text-[11px] font-bold text-white hover:bg-emerald-600 transition"
-                            >
-                              <FiUserCheck /> Let In
-                            </button>
-                          )}
+                          </td>
+                          <td className="p-4 sm:p-5">
+                            {p.status === 'Checked-In' ? (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-800">
+                                <FiCheckCircle /> Checked In ({p.checkInTime || 'Gate Entry'})
+                              </span>
+                            ) : p.status === 'Registration Rejected' ? (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-3 py-1 text-[11px] font-bold text-rose-800">
+                                Rejected by Club
+                              </span>
+                            ) : p.status === 'Allowed to Attend' ? (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-[11px] font-bold text-sky-800">
+                                Approved · Allowed Entry
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-800">
+                                Registered · Pending Gate
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-4 sm:p-5 text-right flex items-center justify-end gap-2">
+                            {p.status !== 'Checked-In' && (
+                              <>
+                                {p.status !== 'Allowed to Attend' && (
+                                  <button
+                                    onClick={() => updateRegistrationStatus(p.ticketId, 'Allowed to Attend')}
+                                    className="rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-[10px] font-bold text-emerald-700 hover:bg-emerald-600 hover:text-white transition"
+                                  >
+                                    Approve
+                                  </button>
+                                )}
+                                {p.status !== 'Registration Rejected' && (
+                                  <button
+                                    onClick={() => updateRegistrationStatus(p.ticketId, 'Registration Rejected')}
+                                    className="rounded-full bg-rose-50 border border-rose-200 px-3 py-1 text-[10px] font-bold text-rose-700 hover:bg-rose-600 hover:text-white transition"
+                                  >
+                                    Reject
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => checkInParticipant(p.ticketId)}
+                                  className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-3.5 py-1 text-[10px] font-bold text-white hover:bg-emerald-600 transition"
+                                >
+                                  <FiUserCheck /> Let In
+                                </button>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="p-8 text-center text-slate-500 font-medium text-xs">
+                          No student registrations recorded yet. Students who register for your events will appear here for live gate check-in.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -300,6 +347,25 @@ export default function ManagerDashboard() {
             )}
 
             <form onSubmit={handleCreateEvent} className="rounded-[2.25rem] border border-slate-200 bg-white p-6 sm:p-8 shadow-soft space-y-5">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Host Organization / Club</label>
+                <select
+                  value={selectedClubId}
+                  onChange={(e) => setSelectedClubId(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs outline-none focus:border-primary focus:bg-white"
+                >
+                  {clubs && clubs.length > 0 ? (
+                    clubs.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} ({c.college || 'Campus Hub'})
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">Campus Hub Collective</option>
+                  )}
+                </select>
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Event Title</label>
@@ -393,11 +459,44 @@ export default function ManagerDashboard() {
 
               <button
                 type="submit"
-                className="w-full rounded-full bg-secondary py-3.5 text-xs font-bold text-white shadow-soft transition hover:bg-violet-600"
+                disabled={isSubmittingEvent}
+                className="w-full rounded-full bg-secondary py-3.5 text-xs font-bold text-white shadow-soft transition hover:bg-violet-600 disabled:opacity-50"
               >
-                Publish Event & Issue Limited Passes
+                {isSubmittingEvent ? 'Publishing to Supabase DB...' : 'Publish Event & Issue Limited Passes'}
               </button>
             </form>
+
+            {/* Hosted Events Management & Deletion */}
+            <div className="space-y-4 pt-4">
+              <h3 className="text-xl font-bold text-slate-950">Active Hosted Events ({events.length})</h3>
+              {events.length > 0 ? (
+                <div className="space-y-3">
+                  {events.map((ev) => (
+                    <div
+                      key={ev.id}
+                      className="p-5 rounded-2xl bg-white border border-slate-200 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    >
+                      <div className="flex items-center gap-4">
+                        <img src={ev.poster} alt={ev.title} className="h-14 w-14 rounded-xl object-cover border border-slate-100" />
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-primary">{ev.category}</span>
+                          <h4 className="text-sm font-bold text-slate-950">{ev.title}</h4>
+                          <p className="text-xs text-slate-500">{ev.date} · {ev.location}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deleteManagerEvent(ev.id)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-600 hover:text-white"
+                      >
+                        <FiTrash2 /> Delete Event
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 italic">No events published yet.</p>
+              )}
+            </div>
           </div>
         )}
 
@@ -548,17 +647,23 @@ export default function ManagerDashboard() {
             </form>
 
             {/* Active Sponsors Grid */}
-            <div className="grid sm:grid-cols-3 gap-4">
-              {sponsorsList.map((s, idx) => (
-                <div key={idx} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-soft flex items-center gap-4">
-                  <img src={s.logo} alt={s.name} className="h-12 w-12 rounded-xl object-cover border border-slate-100" />
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary">{s.tier}</span>
-                    <h4 className="text-sm font-bold text-slate-900">{s.name}</h4>
+            {sponsorsList.length > 0 ? (
+              <div className="grid sm:grid-cols-3 gap-4">
+                {sponsorsList.map((s, idx) => (
+                  <div key={idx} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-soft flex items-center gap-4">
+                    <img src={s.logo} alt={s.name} className="h-12 w-12 rounded-xl object-cover border border-slate-100" />
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">{s.tier}</span>
+                      <h4 className="text-sm font-bold text-slate-900">{s.name}</h4>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 rounded-[2rem] bg-white border border-slate-200 shadow-soft text-center text-slate-500 text-xs font-medium">
+                No event sponsors added yet. Use the form above to add official brand sponsors to your campus events.
+              </div>
+            )}
           </div>
         )}
       </div>

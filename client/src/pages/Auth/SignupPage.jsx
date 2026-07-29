@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -11,7 +11,13 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [role, setRole] = useState('student');
   const navigate = useNavigate();
-  const { signup, demoLogin } = useAuth();
+  const { user, signup, demoLogin } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const onSubmit = async (data) => {
     setLoading(true);

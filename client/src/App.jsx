@@ -15,6 +15,7 @@ import SignupPage from './pages/Auth/SignupPage';
 import StudentDashboard from './pages/Dashboard/StudentDashboard';
 import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
 import MobileScannerPage from './pages/Scanner/MobileScannerPage';
+import ProfilePage from './pages/Profile/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 
@@ -86,6 +87,7 @@ export default function App() {
             }
           />
 
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignupPage />} />
           <Route path="register" element={<SignupPage />} />
