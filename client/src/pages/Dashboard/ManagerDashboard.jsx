@@ -54,6 +54,7 @@ export default function ManagerDashboard() {
   // Announcement Form State
   const [annTitle, setAnnTitle] = useState('');
   const [annContent, setAnnContent] = useState('');
+  const [selectedAnnouncementEventId, setSelectedAnnouncementEventId] = useState('');
 
   // Sponsor Form State
   const [sponsorsList, setSponsorsList] = useState([]);
@@ -94,9 +95,10 @@ export default function ManagerDashboard() {
   const handlePostAnnouncement = (e) => {
     e.preventDefault();
     if (!annTitle.trim() || !annContent.trim()) return;
-    addClubAnnouncement(annTitle, annContent);
+    addClubAnnouncement(annTitle, annContent, selectedClubId || null, selectedAnnouncementEventId || null);
     setAnnTitle('');
     setAnnContent('');
+    setSelectedAnnouncementEventId('');
   };
 
   // Handle Sponsor Submit
@@ -573,6 +575,24 @@ export default function ManagerDashboard() {
                     placeholder="Write announcement details for students..."
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs outline-none focus:border-primary"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Link to Event (optional)</label>
+                  <select
+                    value={selectedAnnouncementEventId}
+                    onChange={(e) => setSelectedAnnouncementEventId(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs outline-none focus:border-primary"
+                  >
+                    <option value="">General club announcement</option>
+                    {events
+                      .filter((event) => String(event.clubId) === String(selectedClubId))
+                      .map((event) => (
+                        <option key={event.id} value={event.id}>
+                          {event.title}
+                        </option>
+                      ))}
+                  </select>
                 </div>
 
                 <button

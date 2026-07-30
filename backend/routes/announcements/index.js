@@ -6,7 +6,13 @@ const router = express.Router();
 
 router.get('/club/:clubId', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('announcements').select('*').eq('club_id', req.params.clubId).order('created_at', { ascending: false });
+    let query = supabase.from('announcements').select('*').eq('club_id', req.params.clubId);
+
+    if (req.query.event_id) {
+      query = query.eq('event_id', req.query.event_id);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
     if (error) {
       return res.status(400).json({ error: error.message });
     }
@@ -22,6 +28,10 @@ router.post('/club/:clubId', authMiddleware, async (req, res) => {
     title: req.body.title,
     content: req.body.content,
   };
+
+  if (req.body.event_id) {
+    payload.event_id = req.body.event_id;
+  }
 
   try {
     const { data, error } = await supabase.from('announcements').insert(payload).select().single();
@@ -39,6 +49,10 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     title: req.body.title,
     content: req.body.content,
   };
+
+  if (req.body.event_id !== undefined) {
+    updates.event_id = req.body.event_id;
+  }
 
   try {
     const { data, error } = await supabase.from('announcements').update(updates).eq('id', req.params.id).select().single();

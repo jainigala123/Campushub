@@ -133,6 +133,7 @@ export default function ClubDetailsPage() {
   // Announcement Form State
   const [annTitle, setAnnTitle] = useState('');
   const [annContent, setAnnContent] = useState('');
+  const [selectedAnnouncementEventId, setSelectedAnnouncementEventId] = useState('');
 
   const handleAction = async () => {
     if (!user) {
@@ -177,14 +178,21 @@ export default function ClubDetailsPage() {
   const handlePostAnnouncement = (e) => {
     e.preventDefault();
     if (!annTitle || !annContent) return;
-    addClubAnnouncement(annTitle, annContent);
+    addClubAnnouncement(annTitle, annContent, club.id, selectedAnnouncementEventId || null);
     setAnnTitle('');
     setAnnContent('');
+    setSelectedAnnouncementEventId('');
     setSuccessMsg('Announcement broadcasted to members!');
     setTimeout(() => setSuccessMsg(''), 3500);
   };
 
   // Combine database members with local session if needed
+  const visibleAnnouncements = announcements.filter((ann) => {
+    if (String(ann.clubId) !== String(club.id)) return false;
+    if (!ann.eventId) return true;
+    return clubEventIds.includes(ann.eventId);
+  });
+
   const displayMembers = dbMembers.length > 0 ? dbMembers : [
     {
       id: 'owner-default',
@@ -311,7 +319,7 @@ export default function ClubDetailsPage() {
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
           }`}
         >
-          <FiBell /> Announcements ({announcements.length})
+          <FiBell /> Announcements ({visibleAnnouncements.length})
         </button>
 
         {isClubMember && (
@@ -427,9 +435,9 @@ export default function ClubDetailsPage() {
       {activeTab === 'announcements' && (
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-slate-950">Broadcast Announcements</h2>
-          {announcements.length > 0 ? (
+          {visibleAnnouncements.length > 0 ? (
             <div className="space-y-4 max-w-3xl">
-              {announcements.map((ann) => (
+              {visibleAnnouncements.map((ann) => (
                 <div key={ann.id} className="p-6 rounded-[2rem] bg-white border border-slate-200 shadow-soft space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-primary">{ann.author || club.name}</span>
@@ -904,6 +912,22 @@ export default function ClubDetailsPage() {
                   placeholder="Write message to club members..."
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs outline-none focus:border-primary focus:bg-white"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Link to Club Event (optional)</label>
+                <select
+                  value={selectedAnnouncementEventId}
+                  onChange={(e) => setSelectedAnnouncementEventId(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs outline-none focus:border-primary focus:bg-white"
+                >
+                  <option value="">General club announcement</option>
+                  {clubEvents.map((event) => (
+                    <option key={event.id} value={event.id}>
+                      {event.title}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <button

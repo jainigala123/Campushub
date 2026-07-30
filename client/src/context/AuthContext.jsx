@@ -733,6 +733,7 @@ export function AuthProvider({ children }) {
             ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             : 'Just now',
           clubId: a.club_id,
+          eventId: a.event_id || null,
         }));
         setAnnouncements(mapped);
       }
@@ -786,7 +787,7 @@ export function AuthProvider({ children }) {
     );
   };
 
-  const addClubAnnouncement = async (title, content, targetClubId) => {
+  const addClubAnnouncement = async (title, content, targetClubId, eventId = null) => {
     let clubId = targetClubId || myMemberships[0]?.club_id || clubs[0]?.id;
     if (!isValidUUID(clubId)) {
       const { data: cData } = await supabase.from('clubs').select('id').limit(1).maybeSingle();
@@ -800,6 +801,7 @@ export function AuthProvider({ children }) {
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       author: clubProfile.name || 'Club Lead',
       clubId,
+      eventId,
     };
 
     setAnnouncements((prev) => [newAnn, ...prev]);
@@ -812,6 +814,7 @@ export function AuthProvider({ children }) {
             club_id: clubId,
             title,
             content,
+            event_id: eventId || null,
           })
           .select()
           .single();
