@@ -1,9 +1,15 @@
+import WebSocket from 'ws';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import registerRoutes from './common/routeRegistry.js';
 
+if (typeof globalThis.WebSocket === 'undefined') {
+  globalThis.WebSocket = WebSocket;
+}
+
 dotenv.config();
+
 
 const app = express();
 app.use(cors());

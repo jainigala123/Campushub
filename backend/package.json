@@ -3,14 +3,18 @@
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
     "express": "^4.21.2",
-    "@supabase/supabase-js": "^2.45.3"
+    "ws": "^8.18.0"
   }
 }
